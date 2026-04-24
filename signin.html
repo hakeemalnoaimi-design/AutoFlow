@@ -186,6 +186,38 @@
       if (r.data.session) window.location.href = 'index.html';
     });
 
+    // ── GOOGLE SIGNUP WEBHOOK ─────────────────────────────────────────────────
+    _sb.auth.onAuthStateChange(async function(event, session) {
+      console.log('Auth event:', event, 'User:', session?.user?.email);
+
+      if (event === 'SIGNED_IN' && session) {
+        const createdAt  = new Date(session.user.created_at).getTime();
+        const lastSignIn = new Date(session.user.last_sign_in_at).getTime();
+        const isNewUser  = (lastSignIn - createdAt) < 10000;
+        console.log('isNewUser:', isNewUser, 'diff ms:', lastSignIn - createdAt);
+
+        if (isNewUser) {
+          console.log('New user detected - sending to webhook');
+          try {
+            const response = await fetch('https://hakeem93.app.n8n.cloud/webhook/autoflow-google-signup', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                'Full Name': session.user.user_metadata?.full_name || session.user.email,
+                'Email': session.user.email,
+                'Signup Date': new Date().toISOString(),
+                'Source': 'Google',
+                'Status': 'Active'
+              })
+            });
+            console.log('Webhook response:', response.status);
+          } catch(err) {
+            console.error('Webhook error:', err);
+          }
+        }
+      }
+    });
+
     // ── GOOGLE OAUTH ──────────────────────────────────────────────────────────
     document.getElementById('google-btn').addEventListener('click', function() {
       _sb.auth.signInWithOAuth({

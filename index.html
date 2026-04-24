@@ -544,16 +544,15 @@
   <script src="js/main.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script>
-    (function () {
-      var _sb = supabase.createClient(
-        'https://ennxtmhflcnnhitltscq.supabase.co',
-        'sb_publishable_tj2KPfaIxVqDpR5XkLUXFw_jTTEpcY4'
-      );
+    var _sb = supabase.createClient(
+      'https://ennxtmhflcnnhitltscq.supabase.co',
+      'sb_publishable_tj2KPfaIxVqDpR5XkLUXFw_jTTEpcY4'
+    );
 
-      var navAuth   = document.getElementById('nav-auth');
+    document.addEventListener('DOMContentLoaded', async function() {
+      // ── NAV AUTH STATE ──────────────────────────────────────────────────────
+      var navAuth    = document.getElementById('nav-auth');
       var mobileAuth = document.getElementById('mobile-auth-section');
-
-      // Snapshot the logged-out HTML so we can restore it after sign-out
       var origDesktop = navAuth.innerHTML;
       var origMobile  = mobileAuth.innerHTML;
 
@@ -565,58 +564,60 @@
         return el;
       }
 
-      function handleSignOut() {
-        _sb.auth.signOut();
-      }
+      function handleSignOut() { _sb.auth.signOut(); }
 
       function updateNav(session) {
         if (session) {
           var user = session.user;
           var name = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || user.email;
-
-          // Desktop: greeting + sign-out button
           navAuth.innerHTML = '';
           navAuth.appendChild(buildEl('span', 'text-sm text-gray-700 font-medium max-w-[160px] truncate', name));
           navAuth.appendChild(buildEl('button', 'text-sm font-medium text-gray-500 hover:text-red-600 transition-colors px-3 py-2', 'Sign Out', handleSignOut));
-
-          // Mobile: greeting + sign-out button
           mobileAuth.innerHTML = '';
           mobileAuth.appendChild(buildEl('span', 'block px-3 py-2 text-sm font-medium text-gray-700 truncate', name));
           mobileAuth.appendChild(buildEl('button', 'block w-full text-center px-4 py-2 rounded-lg text-sm font-medium text-red-600 border border-red-200 hover:bg-red-50', 'Sign Out', handleSignOut));
         } else {
-          navAuth.innerHTML   = origDesktop;
+          navAuth.innerHTML    = origDesktop;
           mobileAuth.innerHTML = origMobile;
         }
       }
 
-      _sb.auth.getSession().then(function (r) { updateNav(r.data.session); });
+      const { data: { session } } = await _sb.auth.getSession();
+      updateNav(session);
 
-      // ── GOOGLE SIGNUP WEBHOOK ─────────────────────────────────────────────
-      // Fires on every SIGNED_IN event (including after the Google OAuth redirect
-      // back to this page). New-user detection: last_sign_in_at and created_at
-      // are within 10 seconds of each other only on the very first login.
-      _sb.auth.onAuthStateChange(async function (event, session) {
+      // ── GOOGLE SIGNUP WEBHOOK ───────────────────────────────────────────────
+      _sb.auth.onAuthStateChange(async function(event, session) {
         updateNav(session);
+        console.log('Auth event:', event, 'User:', session?.user?.email);
+
         if (event === 'SIGNED_IN' && session) {
-          var isNewUser = new Date(session.user.last_sign_in_at) - new Date(session.user.created_at) < 10000;
+          const createdAt  = new Date(session.user.created_at).getTime();
+          const lastSignIn = new Date(session.user.last_sign_in_at).getTime();
+          const isNewUser  = (lastSignIn - createdAt) < 10000;
+          console.log('isNewUser:', isNewUser, 'diff ms:', lastSignIn - createdAt);
+
           if (isNewUser) {
-            console.log('Sending to webhook:', session.user.email, 'isNewUser:', isNewUser);
-            var response = await fetch('https://hakeem93.app.n8n.cloud/webhook/autoflow-google-signup', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                'Full Name': session.user.user_metadata.full_name || session.user.email,
-                'Email': session.user.email,
-                'Signup Date': new Date().toISOString(),
-                'Source': 'Google',
-                'Status': 'Active'
-              })
-            });
-            console.log('Webhook response status:', response.status);
+            console.log('New user detected - sending to webhook');
+            try {
+              const response = await fetch('https://hakeem93.app.n8n.cloud/webhook/autoflow-google-signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  'Full Name': session.user.user_metadata?.full_name || session.user.email,
+                  'Email': session.user.email,
+                  'Signup Date': new Date().toISOString(),
+                  'Source': 'Google',
+                  'Status': 'Active'
+                })
+              });
+              console.log('Webhook response:', response.status);
+            } catch(err) {
+              console.error('Webhook error:', err);
+            }
           }
         }
       });
-    })();
+    });
   </script>
 </body>
 </html>
