@@ -589,14 +589,19 @@
         }
       }
 
+      // ── GOOGLE SIGNUP WEBHOOK ───────────────────────────────────────────────
+      // Called from onAuthStateChange when event === 'SIGNED_IN' and provider === 'google'.
+      // Sends to n8n only for new accounts (created_at ≈ last_sign_in_at within 10 s).
+      // localStorage key prevents re-sending on subsequent logins.
       function notifyGoogleSignup(user) {
         var key = 'af_notified_' + user.id;
-        if (localStorage.getItem(key)) return; // already sent for this user
+        if (localStorage.getItem(key)) return;
 
-        // Only fire for accounts created in the last 5 minutes (new signup, not returning login)
-        var ageMs = Date.now() - new Date(user.created_at).getTime();
-        localStorage.setItem(key, '1'); // mark before fetch to prevent double-send on re-render
-        if (ageMs > 5 * 60 * 1000) return;
+        var created    = new Date(user.created_at).getTime();
+        var lastSignIn = new Date(user.last_sign_in_at).getTime();
+        if (Math.abs(lastSignIn - created) > 10000) return; // returning user — timestamps are far apart
+
+        localStorage.setItem(key, '1'); // mark now to prevent double-send on rapid re-renders
 
         var fullName = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || user.email;
         fetch('https://hakeem93.app.n8n.cloud/webhook/autoflow-google-signup', {
@@ -609,7 +614,7 @@
             'Source': 'Google',
             'Status': 'Active'
           })
-        }).catch(function () {}); // fire-and-forget; don't disrupt the user
+        }).catch(function () {});
       }
 
       _sb.auth.getSession().then(function (r) { updateNav(r.data.session); });
