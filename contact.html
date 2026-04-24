@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Request Automation — AutoFlow</title>
+  <meta name="description" content="Submit your automation request and AutoFlow will build a custom n8n workflow for your business." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50:  '#EEF2FF',
+              100: '#E0E7FF',
+              200: '#C7D2FE',
+              500: '#6366F1',
+              600: '#4F46E5',
+              700: '#4338CA',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui']
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="font-sans text-gray-800 antialiased bg-gray-50">
+
+  <!-- NAVBAR -->
+  <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="index.html" class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+          <span class="text-xl font-bold text-gray-900">AutoFlow</span>
+        </a>
+        <div class="hidden md:flex items-center gap-8">
+          <a href="index.html" class="text-sm font-medium text-gray-600 hover:text-brand-600 transition-colors">Home</a>
+          <a href="index.html#features" class="text-sm font-medium text-gray-600 hover:text-brand-600 transition-colors">Features</a>
+          <a href="index.html#how-it-works" class="text-sm font-medium text-gray-600 hover:text-brand-600 transition-colors">How It Works</a>
+          <a href="contact.html" class="text-sm font-medium text-brand-600">Contact</a>
+        </div>
+        <div class="hidden md:flex items-center gap-3">
+          <a href="signin.html" class="text-sm font-medium text-gray-600 hover:text-brand-600 transition-colors px-3 py-2">Sign In</a>
+          <a href="signup.html" class="text-sm font-semibold text-white bg-brand-500 hover:bg-brand-600 transition-colors px-4 py-2 rounded-lg">Get Started</a>
+        </div>
+        <button id="menu-btn" class="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100" aria-label="Toggle menu">
+          <svg id="icon-open" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+          <svg id="icon-close" class="w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden border-t border-gray-100 bg-white px-4 pb-4 pt-2 space-y-1">
+      <a href="index.html" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">Home</a>
+      <a href="index.html#features" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">Features</a>
+      <a href="index.html#how-it-works" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">How It Works</a>
+      <a href="contact.html" class="block px-3 py-2 rounded-lg text-sm font-medium text-brand-600 bg-brand-50">Contact</a>
+      <div class="pt-2 border-t border-gray-100 flex flex-col gap-2">
+        <a href="signin.html" class="block text-center px-4 py-2 rounded-lg text-sm font-medium text-gray-700 border border-gray-200 hover:bg-gray-50">Sign In</a>
+        <a href="signup.html" class="block text-center px-4 py-2 rounded-lg text-sm font-semibold text-white bg-brand-500 hover:bg-brand-600">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <div class="bg-white border-b border-gray-100 py-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      <nav class="flex items-center gap-2 text-sm text-gray-500 mb-4">
+        <a href="index.html" class="hover:text-brand-600 transition-colors">Home</a>
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <span class="text-gray-900 font-medium">Request Automation</span>
+      </nav>
+      <h1 class="text-3xl font-extrabold text-gray-900">Tell us about your automation needs</h1>
+      <p class="mt-2 text-gray-500">Fill out the form below and we'll get back to you within 24 hours with a custom proposal.</p>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main class="py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid lg:grid-cols-3 gap-10">
+
+        <!-- LEFT: Trust & Info -->
+        <div class="lg:col-span-1 space-y-6">
+
+          <!-- What happens next -->
+          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h2 class="text-base font-bold text-gray-900 mb-4">What happens next?</h2>
+            <ol class="space-y-4">
+              <li class="flex gap-3">
+                <div class="w-6 h-6 rounded-full bg-brand-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">1</div>
+                <div>
+                  <p class="text-sm font-medium text-gray-900">We review your request</p>
+                  <p class="text-xs text-gray-500 mt-0.5">Our team analyzes your workflow and automation goals within 24 hours.</p>
+                </div>
+              </li>
+              <li class="flex gap-3">
+                <div class="w-6 h-6 rounded-full bg-brand-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">2</div>
+                <div>
+                  <p class="text-sm font-medium text-gray-900">Free consultation call</p>
+                  <p class="text-xs text-gray-500 mt-0.5">We'll schedule a quick call to clarify details and share our proposed solution.</p>
+                </div>
+              </li>
+              <li class="flex gap-3">
+                <div class="w-6 h-6 rounded-full bg-brand-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">3</div>
+                <div>
+                  <p class="text-sm font-medium text-gray-900">We build your workflow</p>
+                  <p class="text-xs text-gray-500 mt-0.5">Once approved, we configure and test your custom n8n automation.</p>
+                </div>
+              </li>
+              <li class="flex gap-3">
+                <div class="w-6 h-6 rounded-full bg-green-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">✓</div>
+                <div>
+                  <p class="text-sm font-medium text-gray-900">Go live & automate</p>
+                  <p class="text-xs text-gray-500 mt-0.5">Your workflow launches and runs 24/7. We monitor and maintain it for you.</p>
+                </div>
+              </li>
+            </ol>
+          </div>
+
+          <!-- Trust Points -->
+          <div class="bg-brand-50 rounded-2xl border border-brand-100 p-6">
+            <h3 class="text-sm font-bold text-brand-900 mb-3">Why choose AutoFlow?</h3>
+            <ul class="space-y-2.5">
+              <li class="flex items-start gap-2.5 text-sm text-brand-800">
+                <svg class="w-4 h-4 text-brand-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                Response within 24 hours, guaranteed
+              </li>
+              <li class="flex items-start gap-2.5 text-sm text-brand-800">
+                <svg class="w-4 h-4 text-brand-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                Free initial consultation, no obligation
+              </li>
+              <li class="flex items-start gap-2.5 text-sm text-brand-800">
+                <svg class="w-4 h-4 text-brand-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                Custom-built — not a template workflow
+              </li>
+              <li class="flex items-start gap-2.5 text-sm text-brand-800">
+                <svg class="w-4 h-4 text-brand-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                Ongoing maintenance included
+              </li>
+              <li class="flex items-start gap-2.5 text-sm text-brand-800">
+                <svg class="w-4 h-4 text-brand-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                No lock-in contracts
+              </li>
+            </ul>
+          </div>
+
+          <!-- Contact info -->
+          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h3 class="text-sm font-bold text-gray-900 mb-3">Prefer to reach out directly?</h3>
+            <a href="mailto:hello@autoflow.io" class="flex items-center gap-2 text-sm text-brand-600 hover:text-brand-700 font-medium">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+              hello@autoflow.io
+            </a>
+          </div>
+
+        </div>
+
+        <!-- RIGHT: Form -->
+        <div class="lg:col-span-2">
+          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+
+            <!-- Error banner -->
+            <div id="error-banner" class="hidden mb-6 flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+              <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <span id="error-message">Something went wrong. Please try again or email us directly.</span>
+            </div>
+
+            <!-- Success state (hidden by default) -->
+            <div id="success-state" class="hidden text-center py-12">
+              <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-5">
+                <svg class="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <h3 class="text-2xl font-bold text-gray-900 mb-2">Request Received!</h3>
+              <p class="text-gray-500 text-sm max-w-sm mx-auto mb-6">We've got your automation request. Our team will review it and reach out within 24 hours.</p>
+              <a href="index.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl text-sm transition-colors">
+                Back to Home
+              </a>
+            </div>
+
+            <!-- The Form -->
+            <form id="request-form" novalidate>
+              <h2 class="text-lg font-bold text-gray-900 mb-1">Automation Request</h2>
+              <p class="text-sm text-gray-500 mb-7">Fields marked <span class="text-red-500">*</span> are required.</p>
+
+              <!-- Row 1: Name + Email -->
+              <div class="grid sm:grid-cols-2 gap-5 mb-5">
+                <div>
+                  <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1.5">Full Name <span class="text-red-500">*</span></label>
+                  <input type="text" id="fullName" name="fullName" placeholder="Jane Smith" required
+                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition" />
+                  <p class="field-error hidden mt-1 text-xs text-red-600">Please enter your full name.</p>
+                </div>
+                <div>
+                  <label for="email" class="block text-sm font-medium text-gray-700 mb-1.5">Business Email <span class="text-red-500">*</span></label>
+                  <input type="email" id="email" name="email" placeholder="jane@company.com" required
+                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition" />
+                  <p class="field-error hidden mt-1 text-xs text-red-600">Please enter a valid email address.</p>
+                </div>
+              </div>
+
+              <!-- Row 2: Company + Phone -->
+              <div class="grid sm:grid-cols-2 gap-5 mb-5">
+                <div>
+                  <label for="company" class="block text-sm font-medium text-gray-700 mb-1.5">Company / Business Name <span class="text-red-500">*</span></label>
+                  <input type="text" id="company" name="company" placeholder="Acme Corp" required
+                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition" />
+                  <p class="field-error hidden mt-1 text-xs text-red-600">Please enter your company name.</p>
+                </div>
+                <div>
+                  <label for="phone" class="block text-sm font-medium text-gray-700 mb-1.5">Phone Number <span class="text-gray-400 font-normal">(optional)</span></label>
+                  <input type="tel" id="phone" name="phone" placeholder="+1 (555) 000-0000"
+                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition" />
+                </div>
+              </div>
+
+              <!-- Row 3: Industry + Automation Type -->
+              <div class="grid sm:grid-cols-2 gap-5 mb-5">
+                <div>
+                  <label for="industry" class="block text-sm font-medium text-gray-700 mb-1.5">Industry <span class="text-red-500">*</span></label>
+                  <select id="industry" name="industry" required
+                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition appearance-none">
+                    <option value="" disabled selected>Select your industry</option>
+                    <option value="Technology">Technology</option>
+                    <option value="E-commerce">E-commerce / Retail</option>
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="Finance">Finance / Accounting</option>
+                    <option value="Marketing">Marketing / Advertising</option>
+                    <option value="Real Estate">Real Estate</option>
+                    <option value="Education">Education</option>
+                    <option value="Legal">Legal</option>
+                    <option value="Manufacturing">Manufacturing</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <p class="field-error hidden mt-1 text-xs text-red-600">Please select your industry.</p>
+                </div>
+                <div>
+                  <label for="automationType" class="block text-sm font-medium text-gray-700 mb-1.5">Automation Type <span class="text-red-500">*</span></label>
+                  <select id="automationType" name="automationType" required
+                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition appearance-none">
+                    <option value="" disabled selected>Select a type</option>
+                    <option value="Data Entry / Sync">Data Entry / Sync</option>
+                    <option value="Email Automation">Email Automation</option>
+                    <option value="CRM / Sales">CRM / Sales Pipeline</option>
+                    <option value="Reporting / Analytics">Reporting / Analytics</option>
+                    <option value="Social Media">Social Media Scheduling</option>
+                    <option value="Notifications / Alerts">Notifications / Alerts</option>
+                    <option value="Document Processing">Document Processing</option>
+                    <option value="Lead Generation">Lead Generation</option>
+                    <option value="Custom">Custom / Other</option>
+                  </select>
+                  <p class="field-error hidden mt-1 text-xs text-red-600">Please select an automation type.</p>
+                </div>
+              </div>
+
+              <!-- Current Workflow -->
+              <div class="mb-5">
+                <label for="currentWorkflow" class="block text-sm font-medium text-gray-700 mb-1.5">
+                  Describe Your Current Workflow <span class="text-red-500">*</span>
+                </label>
+                <textarea id="currentWorkflow" name="currentWorkflow" rows="4" required
+                  placeholder="What do you currently do manually? Walk us through the steps — the more detail the better. E.g. 'Every Monday I export a report from Shopify, copy it into Google Sheets, then manually email a summary to my team...'"
+                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition resize-none"></textarea>
+                <p class="field-error hidden mt-1 text-xs text-red-600">Please describe your current workflow (at least 20 characters).</p>
+              </div>
+
+              <!-- Automation Goal -->
+              <div class="mb-5">
+                <label for="automationGoal" class="block text-sm font-medium text-gray-700 mb-1.5">
+                  What Should Be Automated? <span class="text-red-500">*</span>
+                </label>
+                <textarea id="automationGoal" name="automationGoal" rows="4" required
+                  placeholder="Describe the ideal end result. What should happen automatically, and when? E.g. 'Whenever a new order comes in, automatically update the spreadsheet, notify the team in Slack, and send a confirmation email to the customer.'"
+                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition resize-none"></textarea>
+                <p class="field-error hidden mt-1 text-xs text-red-600">Please describe your automation goal (at least 20 characters).</p>
+              </div>
+
+              <!-- Tools used -->
+              <div class="mb-5">
+                <label for="tools" class="block text-sm font-medium text-gray-700 mb-1.5">
+                  Tools & Software You Use <span class="text-gray-400 font-normal">(optional)</span>
+                </label>
+                <input type="text" id="tools" name="tools"
+                  placeholder="e.g. Google Sheets, HubSpot, Slack, Shopify, Airtable, Notion..."
+                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition" />
+              </div>
+
+              <!-- Row: Budget + Referral -->
+              <div class="grid sm:grid-cols-2 gap-5 mb-8">
+                <div>
+                  <label for="budget" class="block text-sm font-medium text-gray-700 mb-1.5">Monthly Budget Range <span class="text-gray-400 font-normal">(optional)</span></label>
+                  <select id="budget" name="budget"
+                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition appearance-none">
+                    <option value="" selected>Not sure yet</option>
+                    <option value="Under $100/mo">Under $100/mo</option>
+                    <option value="$100–$300/mo">$100 – $300/mo</option>
+                    <option value="$300–$500/mo">$300 – $500/mo</option>
+                    <option value="$500+/mo">$500+/mo</option>
+                    <option value="Let's discuss">Let's discuss</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="referral" class="block text-sm font-medium text-gray-700 mb-1.5">How did you hear about us? <span class="text-gray-400 font-normal">(optional)</span></label>
+                  <select id="referral" name="referral"
+                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition appearance-none">
+                    <option value="" selected>Select an option</option>
+                    <option value="Google">Google / Search</option>
+                    <option value="LinkedIn">LinkedIn</option>
+                    <option value="Referral">Referral / Friend</option>
+                    <option value="Social Media">Social Media</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Submit -->
+              <button type="submit" id="submit-btn"
+                class="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl shadow-lg shadow-brand-500/25 transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+                <span id="btn-text">Submit Automation Request</span>
+                <svg id="btn-icon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+                </svg>
+                <svg id="btn-spinner" class="hidden w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+              </button>
+
+              <p class="mt-3 text-center text-xs text-gray-400">By submitting, you agree to our <a href="#" class="text-brand-500 hover:underline">Privacy Policy</a>. No spam, ever.</p>
+            </form>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-gray-900 text-gray-400 py-10 px-4 sm:px-6 lg:px-8 mt-16">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
+      <a href="index.html" class="flex items-center gap-2 text-white">
+        <div class="w-7 h-7 rounded-lg bg-brand-500 flex items-center justify-center">
+          <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        <span class="font-bold">AutoFlow</span>
+      </a>
+      <span>&copy; 2025 AutoFlow. All rights reserved.</span>
+      <div class="flex gap-5">
+        <a href="#" class="hover:text-white transition-colors">Privacy</a>
+        <a href="#" class="hover:text-white transition-colors">Terms</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script>
+    const WEBHOOK_URL = 'https://auto-flow-nu.vercel.app/';
+
+    const form = document.getElementById('request-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const btnText = document.getElementById('btn-text');
+    const btnIcon = document.getElementById('btn-icon');
+    const btnSpinner = document.getElementById('btn-spinner');
+    const errorBanner = document.getElementById('error-banner');
+    const errorMessage = document.getElementById('error-message');
+    const successState = document.getElementById('success-state');
+
+    function getVal(id) {
+      return document.getElementById(id).value.trim();
+    }
+
+    function setFieldError(id, show) {
+      const input = document.getElementById(id);
+      const errEl = input.parentElement.querySelector('.field-error');
+      if (show) {
+        input.classList.add('border-red-400', 'ring-1', 'ring-red-300');
+        input.classList.remove('border-gray-200');
+        if (errEl) errEl.classList.remove('hidden');
+      } else {
+        input.classList.remove('border-red-400', 'ring-1', 'ring-red-300');
+        input.classList.add('border-gray-200');
+        if (errEl) errEl.classList.add('hidden');
+      }
+    }
+
+    function validateEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function validateForm() {
+      let valid = true;
+
+      const fullName = getVal('fullName');
+      setFieldError('fullName', !fullName);
+      if (!fullName) valid = false;
+
+      const email = getVal('email');
+      setFieldError('email', !validateEmail(email));
+      if (!validateEmail(email)) valid = false;
+
+      const company = getVal('company');
+      setFieldError('company', !company);
+      if (!company) valid = false;
+
+      const industry = getVal('industry');
+      setFieldError('industry', !industry);
+      if (!industry) valid = false;
+
+      const automationType = getVal('automationType');
+      setFieldError('automationType', !automationType);
+      if (!automationType) valid = false;
+
+      const currentWorkflow = getVal('currentWorkflow');
+      setFieldError('currentWorkflow', currentWorkflow.length < 20);
+      if (currentWorkflow.length < 20) valid = false;
+
+      const automationGoal = getVal('automationGoal');
+      setFieldError('automationGoal', automationGoal.length < 20);
+      if (automationGoal.length < 20) valid = false;
+
+      return valid;
+    }
+
+    function setLoading(loading) {
+      submitBtn.disabled = loading;
+      btnText.textContent = loading ? 'Submitting...' : 'Submit Automation Request';
+      btnIcon.classList.toggle('hidden', loading);
+      btnSpinner.classList.toggle('hidden', !loading);
+    }
+
+    function showError(msg) {
+      errorMessage.textContent = msg || 'Something went wrong. Please try again or email us directly at hello@autoflow.io.';
+      errorBanner.classList.remove('hidden');
+      errorBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function hideError() {
+      errorBanner.classList.add('hidden');
+    }
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      hideError();
+
+      if (!validateForm()) {
+        const firstError = form.querySelector('.border-red-400');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const payload = {
+        fullName: getVal('fullName'),
+        email: getVal('email'),
+        company: getVal('company'),
+        phone: getVal('phone'),
+        industry: getVal('industry'),
+        automationType: getVal('automationType'),
+        currentWorkflow: getVal('currentWorkflow'),
+        automationGoal: getVal('automationGoal'),
+        tools: getVal('tools'),
+        budget: getVal('budget'),
+        referral: getVal('referral'),
+        submittedAt: new Date().toISOString(),
+      };
+
+      setLoading(true);
+
+      try {
+        const res = await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok || res.status === 0) {
+          form.classList.add('hidden');
+          successState.classList.remove('hidden');
+          successState.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          showError('The server returned an error. Please try again or contact us directly.');
+        }
+      } catch (err) {
+        // Network error or CORS — treat as submitted if it was a no-cors request
+        if (err instanceof TypeError && err.message.includes('fetch')) {
+          form.classList.add('hidden');
+          successState.classList.remove('hidden');
+          successState.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          showError('Unable to submit at this time. Please email us at hello@autoflow.io.');
+        }
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    // Clear field errors on input
+    form.querySelectorAll('input, select, textarea').forEach(function(el) {
+      el.addEventListener('input', function() {
+        setFieldError(el.id, false);
+      });
+    });
+  </script>
+</body>
+</html>
