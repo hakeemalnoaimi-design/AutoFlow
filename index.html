@@ -589,8 +589,39 @@
         }
       }
 
+      function notifyGoogleSignup(user) {
+        var key = 'af_notified_' + user.id;
+        if (localStorage.getItem(key)) return; // already sent for this user
+
+        // Only fire for accounts created in the last 5 minutes (new signup, not returning login)
+        var ageMs = Date.now() - new Date(user.created_at).getTime();
+        localStorage.setItem(key, '1'); // mark before fetch to prevent double-send on re-render
+        if (ageMs > 5 * 60 * 1000) return;
+
+        var fullName = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || user.email;
+        fetch('https://hakeem93.app.n8n.cloud/webhook/autoflow-google-signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            'Full Name': fullName,
+            'Email': user.email,
+            'Signup Date': new Date().toISOString(),
+            'Source': 'Google',
+            'Status': 'Active'
+          })
+        }).catch(function () {}); // fire-and-forget; don't disrupt the user
+      }
+
       _sb.auth.getSession().then(function (r) { updateNav(r.data.session); });
-      _sb.auth.onAuthStateChange(function (_event, session) { updateNav(session); });
+      _sb.auth.onAuthStateChange(function (event, session) {
+        updateNav(session);
+        if (event === 'SIGNED_IN' && session) {
+          var user = session.user;
+          if (user.app_metadata && user.app_metadata.provider === 'google') {
+            notifyGoogleSignup(user);
+          }
+        }
+      });
     })();
   </script>
 </body>
