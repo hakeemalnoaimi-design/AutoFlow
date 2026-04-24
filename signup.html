@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script>
     tailwind.config = {
       theme: {
@@ -152,9 +153,9 @@
               class="mt-0.5 w-4 h-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500 cursor-pointer flex-shrink-0" />
             <label for="terms" class="text-sm text-gray-600 cursor-pointer leading-relaxed">
               I agree to the
-              <a href="#" class="text-brand-600 hover:underline font-medium">Terms of Service</a>
+              <a href="terms.html" class="text-brand-600 hover:underline font-medium">Terms of Service</a>
               and
-              <a href="#" class="text-brand-600 hover:underline font-medium">Privacy Policy</a>
+              <a href="privacy.html" class="text-brand-600 hover:underline font-medium">Privacy Policy</a>
             </label>
           </div>
           <p id="terms-error" class="hidden text-xs text-red-600 -mt-2">You must accept the terms to continue.</p>
@@ -180,7 +181,7 @@
 
         <!-- OAuth placeholders -->
         <div class="grid grid-cols-2 gap-3">
-          <button type="button" class="flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+          <button type="button" id="google-btn" class="flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
             <svg class="w-4 h-4" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -204,12 +205,68 @@
         Already have an account?
         <a href="signin.html" class="text-brand-600 font-medium hover:text-brand-700 ml-1">Sign in instead</a>
       </p>
+
+      <!-- Legal links -->
+      <p class="text-center text-xs text-gray-400 mt-4">
+        <a href="terms.html" class="hover:text-gray-600 transition-colors">Terms of Service</a>
+        <span class="mx-2">·</span>
+        <a href="privacy.html" class="hover:text-gray-600 transition-colors">Privacy Policy</a>
+      </p>
     </div>
   </main>
 
   <script src="js/main.js"></script>
   <script>
-    // Password show/hide
+    // ── CONFIG ──────────────────────────────────────────────────────────────
+    var SIGNUP_WEBHOOK_URL = 'YOUR_N8N_WEBHOOK_URL';
+    var GOOGLE_CLIENT_ID   = 'YOUR_GOOGLE_CLIENT_ID';
+
+    // ── GOOGLE OAUTH ─────────────────────────────────────────────────────────
+    window.addEventListener('load', function() {
+      if (typeof google === 'undefined') return;
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleSignIn,
+        auto_select: false,
+        cancel_on_tap_outside: true,
+      });
+    });
+
+    document.getElementById('google-btn').addEventListener('click', function() {
+      if (typeof google === 'undefined') {
+        alert('Google Sign-In unavailable — replace YOUR_GOOGLE_CLIENT_ID with a real client ID from Google Cloud Console.');
+        return;
+      }
+      google.accounts.id.prompt();
+    });
+
+    function handleGoogleSignIn(response) {
+      var parts = response.credential.split('.');
+      var payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+      postSignupWebhook(payload.name || '', payload.email || '', 'google').then(function() {
+        window.location.href = 'contact.html';
+      });
+    }
+
+    // ── WEBHOOK ───────────────────────────────────────────────────────────────
+    async function postSignupWebhook(fullName, email, source) {
+      try {
+        await fetch(SIGNUP_WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fullName: fullName,
+            email: email,
+            signedUpAt: new Date().toISOString(),
+            source: source,
+          }),
+        });
+      } catch (err) {
+        console.warn('Signup webhook failed:', err);
+      }
+    }
+
+    // ── PASSWORD TOGGLE ───────────────────────────────────────────────────────
     function setupToggle(btnId, inputId, openIconId, closeIconId) {
       var btn = document.getElementById(btnId);
       var input = document.getElementById(inputId);
@@ -226,7 +283,7 @@
     setupToggle('toggle-password', 'password', 'eye-off-icon', 'eye-icon');
     setupToggle('toggle-confirm', 'confirmPassword');
 
-    // Password strength
+    // ── PASSWORD STRENGTH ─────────────────────────────────────────────────────
     var passwordInput = document.getElementById('password');
     var strengthBars = [
       document.getElementById('str-1'),
@@ -257,11 +314,11 @@
       strengthLabel.textContent = val && score ? strengthLabels[score - 1] : '';
     });
 
-    // Validation helpers
+    // ── VALIDATION ────────────────────────────────────────────────────────────
     function getVal(id) { return document.getElementById(id).value.trim(); }
     function validateEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
 
-    function setFieldError(id, show, message) {
+    function setFieldError(id, show) {
       var input = document.getElementById(id);
       var errEl = input.parentElement.querySelector('.field-error') || input.closest('div').querySelector('.field-error');
       if (show) {
@@ -275,11 +332,11 @@
       }
     }
 
-    // Clear on input
     ['fullName','email','password','confirmPassword'].forEach(function(id) {
       document.getElementById(id).addEventListener('input', function() { setFieldError(id, false); });
     });
 
+    // ── FORM SUBMIT ───────────────────────────────────────────────────────────
     document.getElementById('signup-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       document.getElementById('error-banner').classList.add('hidden');
@@ -311,7 +368,6 @@
         return;
       }
 
-      // Show loading
       var btn = document.getElementById('submit-btn');
       var btnText = document.getElementById('btn-text');
       var spinner = document.getElementById('btn-spinner');
@@ -319,8 +375,7 @@
       btnText.textContent = 'Creating account...';
       spinner.classList.remove('hidden');
 
-      // Simulate short delay then redirect to contact
-      await new Promise(function(r) { setTimeout(r, 1000); });
+      await postSignupWebhook(fullName, email, 'form');
       window.location.href = 'contact.html';
     });
   </script>
