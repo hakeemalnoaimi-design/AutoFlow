@@ -9,7 +9,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script>
     tailwind.config = {
       theme: {
@@ -153,9 +152,7 @@
 
         <!-- Forgot password note -->
         <div id="forgot-message" class="hidden mt-4 p-4 bg-brand-50 border border-brand-100 rounded-xl text-sm text-brand-800 text-center">
-          Password reset link will be sent to your email.
-          <br/>
-          <span class="text-xs text-brand-600">(Connect your auth provider to enable this)</span>
+          <span id="forgot-message-text"></span>
         </div>
 
       </div>
@@ -175,33 +172,26 @@
     </div>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/main.js"></script>
   <script>
-    // ── CONFIG ────────────────────────────────────────────────────────────────
-    var GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID';
+    // ── SUPABASE ──────────────────────────────────────────────────────────────
+    var _sb = supabase.createClient(
+      'https://ennxtmhflcnnhitltscq.supabase.co',
+      'sb_publishable_tj2KPfaIxVqDpR5XkLUXFw_jTTEpcY4'
+    );
 
-    // ── GOOGLE OAUTH ──────────────────────────────────────────────────────────
-    window.addEventListener('load', function() {
-      if (typeof google === 'undefined') return;
-      google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: function(response) {
-          var parts = response.credential.split('.');
-          var payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-          // Google sign-in successful — redirect to dashboard
-          window.location.href = 'contact.html';
-        },
-        auto_select: false,
-        cancel_on_tap_outside: true,
-      });
+    // Redirect if already signed in
+    _sb.auth.getSession().then(function(r) {
+      if (r.data.session) window.location.href = 'index.html';
     });
 
+    // ── GOOGLE OAUTH ──────────────────────────────────────────────────────────
     document.getElementById('google-btn').addEventListener('click', function() {
-      if (typeof google === 'undefined') {
-        alert('Google Sign-In unavailable — replace YOUR_GOOGLE_CLIENT_ID with a real client ID from Google Cloud Console.');
-        return;
-      }
-      google.accounts.id.prompt();
+      _sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + '/index.html' }
+      });
     });
 
     // ── PASSWORD TOGGLE ───────────────────────────────────────────────────────
@@ -217,14 +207,30 @@
       eyeOffIcon.classList.toggle('hidden', !isPassword);
     });
 
-    // Forgot password link
-    document.getElementById('forgot-link').addEventListener('click', function(e) {
+    // ── FORGOT PASSWORD ───────────────────────────────────────────────────────
+    document.getElementById('forgot-link').addEventListener('click', async function(e) {
       e.preventDefault();
-      var msg = document.getElementById('forgot-message');
-      msg.classList.toggle('hidden');
+      var email = document.getElementById('email').value.trim();
+      var msgEl = document.getElementById('forgot-message');
+      var msgText = document.getElementById('forgot-message-text');
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        msgText.textContent = 'Enter your email address above, then click "Forgot password?" again.';
+        msgEl.classList.remove('hidden');
+        return;
+      }
+
+      var result = await _sb.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/index.html'
+      });
+
+      msgText.textContent = result.error
+        ? 'Could not send reset email. Please try again.'
+        : 'Reset link sent! Check your inbox for ' + email + '.';
+      msgEl.classList.remove('hidden');
     });
 
-    // Helpers
+    // ── HELPERS ───────────────────────────────────────────────────────────────
     function getVal(id) { return document.getElementById(id).value.trim(); }
     function validateEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
 
@@ -242,11 +248,11 @@
       }
     }
 
-    // Clear on input
     ['email', 'password'].forEach(function(id) {
       document.getElementById(id).addEventListener('input', function() { setFieldError(id, false); });
     });
 
+    // ── FORM SUBMIT ───────────────────────────────────────────────────────────
     document.getElementById('signin-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       document.getElementById('error-banner').classList.add('hidden');
@@ -266,15 +272,19 @@
       btnText.textContent = 'Signing in...';
       spinner.classList.remove('hidden');
 
-      // Simulate auth delay
-      await new Promise(function(r) { setTimeout(r, 1000); });
+      var result = await _sb.auth.signInWithPassword({ email: email, password: password });
 
-      // Re-enable and show error (stub — no backend yet)
       btn.disabled = false;
       btnText.textContent = 'Sign In';
       spinner.classList.add('hidden');
-      document.getElementById('error-banner').classList.remove('hidden');
-      document.getElementById('error-text').textContent = 'Authentication not yet configured. Connect your auth provider (e.g. Supabase, NextAuth, Clerk) to enable sign in.';
+
+      if (result.error) {
+        document.getElementById('error-banner').classList.remove('hidden');
+        document.getElementById('error-text').textContent = result.error.message || 'Invalid email or password.';
+        return;
+      }
+
+      window.location.href = 'index.html';
     });
   </script>
 </body>

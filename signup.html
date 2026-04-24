@@ -9,7 +9,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script>
     tailwind.config = {
       theme: {
@@ -179,8 +178,8 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
           </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-2">Welcome to AutoFlow!</h3>
-          <p class="text-gray-500 text-sm mb-5">You're on the list. We'll be in touch soon.</p>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">Check your email!</h3>
+          <p class="text-gray-500 text-sm mb-5">We sent a confirmation link to your inbox. Click it to activate your account.</p>
           <a href="index.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold rounded-xl transition-colors">
             Back to Home
           </a>
@@ -222,11 +221,19 @@
     </div>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/main.js"></script>
   <script>
-    // ── CONFIG ────────────────────────────────────────────────────────────────
-    var SIGNUP_WEBHOOK_URL = 'https://hakeem93.app.n8n.cloud/webhook/autoflow-signup';
-    var GOOGLE_CLIENT_ID   = 'YOUR_GOOGLE_CLIENT_ID';
+    // ── SUPABASE ──────────────────────────────────────────────────────────────
+    var _sb = supabase.createClient(
+      'https://ennxtmhflcnnhitltscq.supabase.co',
+      'sb_publishable_tj2KPfaIxVqDpR5XkLUXFw_jTTEpcY4'
+    );
+
+    // Redirect if already signed in
+    _sb.auth.getSession().then(function(r) {
+      if (r.data.session) window.location.href = 'index.html';
+    });
 
     // ── SUCCESS / ERROR STATES ────────────────────────────────────────────────
     function showSuccess() {
@@ -244,53 +251,12 @@
     }
 
     // ── GOOGLE OAUTH ──────────────────────────────────────────────────────────
-    window.addEventListener('load', function() {
-      if (typeof google === 'undefined') return;
-      google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleGoogleSignIn,
-        auto_select: false,
-        cancel_on_tap_outside: true,
+    document.getElementById('google-btn').addEventListener('click', function() {
+      _sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + '/index.html' }
       });
     });
-
-    document.getElementById('google-btn').addEventListener('click', function() {
-      if (typeof google === 'undefined') {
-        alert('Google Sign-In unavailable — add your Google Client ID from Google Cloud Console.');
-        return;
-      }
-      google.accounts.id.prompt();
-    });
-
-    function handleGoogleSignIn(response) {
-      var parts = response.credential.split('.');
-      var payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-      submitToWebhook(payload.name || '', payload.email || '', 'google');
-    }
-
-    // ── WEBHOOK ───────────────────────────────────────────────────────────────
-    async function submitToWebhook(fullName, email, source) {
-      var btn = document.getElementById('submit-btn');
-      if (btn) { btn.disabled = true; }
-
-      try {
-        var res = await fetch(SIGNUP_WEBHOOK_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fullName: fullName, email: email, source: source }),
-        });
-
-        if (res.ok) {
-          showSuccess();
-        } else {
-          showFormError('Something went wrong on our end. Please try again or contact us directly.');
-          if (btn) { btn.disabled = false; }
-        }
-      } catch (err) {
-        showFormError('Unable to connect. Please check your internet connection and try again.');
-        if (btn) { btn.disabled = false; }
-      }
-    }
 
     // ── PASSWORD TOGGLE ───────────────────────────────────────────────────────
     function setupToggle(btnId, inputId, openIconId, closeIconId) {
@@ -358,7 +324,7 @@
       }
     }
 
-    ['fullName','email','password','confirmPassword'].forEach(function(id) {
+    ['fullName', 'email', 'password', 'confirmPassword'].forEach(function(id) {
       document.getElementById(id).addEventListener('input', function() { setFieldError(id, false); });
     });
 
@@ -390,7 +356,7 @@
       }
 
       if (!valid) {
-        document.getElementById('error-banner').classList.remove('hidden');
+        showFormError('Please fix the errors below.');
         return;
       }
 
@@ -401,10 +367,31 @@
       btnText.textContent = 'Creating account...';
       spinner.classList.remove('hidden');
 
-      await submitToWebhook(fullName, email, 'email');
+      var result = await _sb.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: { full_name: fullName },
+          emailRedirectTo: window.location.origin + '/index.html'
+        }
+      });
 
       spinner.classList.add('hidden');
+      btn.disabled = false;
       btnText.textContent = 'Create Account';
+
+      if (result.error) {
+        showFormError(result.error.message);
+        return;
+      }
+
+      if (result.data.session) {
+        // Email confirmation disabled — go straight to app
+        window.location.href = 'index.html';
+      } else {
+        // Email confirmation required
+        showSuccess();
+      }
     });
   </script>
 </body>

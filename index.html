@@ -71,7 +71,7 @@
         </div>
 
         <!-- Desktop CTA -->
-        <div class="hidden md:flex items-center gap-3">
+        <div id="nav-auth" class="hidden md:flex items-center gap-3">
           <a href="signin.html" class="text-sm font-medium text-gray-600 hover:text-brand-600 transition-colors px-3 py-2">Sign In</a>
           <a href="signup.html" class="text-sm font-semibold text-white bg-brand-500 hover:bg-brand-600 transition-colors px-4 py-2 rounded-lg">Get Started</a>
         </div>
@@ -94,7 +94,7 @@
       <a href="index.html#features" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">Features</a>
       <a href="index.html#how-it-works" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">How It Works</a>
       <a href="contact.html" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">Contact</a>
-      <div class="pt-2 border-t border-gray-100 flex flex-col gap-2">
+      <div id="mobile-auth-section" class="pt-2 border-t border-gray-100 flex flex-col gap-2">
         <a href="signin.html" class="block text-center px-4 py-2 rounded-lg text-sm font-medium text-gray-700 border border-gray-200 hover:bg-gray-50">Sign In</a>
         <a href="signup.html" class="block text-center px-4 py-2 rounded-lg text-sm font-semibold text-white bg-brand-500 hover:bg-brand-600">Get Started</a>
       </div>
@@ -542,5 +542,56 @@
   </footer>
 
   <script src="js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    (function () {
+      var _sb = supabase.createClient(
+        'https://ennxtmhflcnnhitltscq.supabase.co',
+        'sb_publishable_tj2KPfaIxVqDpR5XkLUXFw_jTTEpcY4'
+      );
+
+      var navAuth   = document.getElementById('nav-auth');
+      var mobileAuth = document.getElementById('mobile-auth-section');
+
+      // Snapshot the logged-out HTML so we can restore it after sign-out
+      var origDesktop = navAuth.innerHTML;
+      var origMobile  = mobileAuth.innerHTML;
+
+      function buildEl(tag, cls, text, onClick) {
+        var el = document.createElement(tag);
+        el.className = cls;
+        el.textContent = text;
+        if (onClick) el.addEventListener('click', onClick);
+        return el;
+      }
+
+      function handleSignOut() {
+        _sb.auth.signOut();
+      }
+
+      function updateNav(session) {
+        if (session) {
+          var user = session.user;
+          var name = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || user.email;
+
+          // Desktop: greeting + sign-out button
+          navAuth.innerHTML = '';
+          navAuth.appendChild(buildEl('span', 'text-sm text-gray-700 font-medium max-w-[160px] truncate', name));
+          navAuth.appendChild(buildEl('button', 'text-sm font-medium text-gray-500 hover:text-red-600 transition-colors px-3 py-2', 'Sign Out', handleSignOut));
+
+          // Mobile: greeting + sign-out button
+          mobileAuth.innerHTML = '';
+          mobileAuth.appendChild(buildEl('span', 'block px-3 py-2 text-sm font-medium text-gray-700 truncate', name));
+          mobileAuth.appendChild(buildEl('button', 'block w-full text-center px-4 py-2 rounded-lg text-sm font-medium text-red-600 border border-red-200 hover:bg-red-50', 'Sign Out', handleSignOut));
+        } else {
+          navAuth.innerHTML   = origDesktop;
+          mobileAuth.innerHTML = origMobile;
+        }
+      }
+
+      _sb.auth.getSession().then(function (r) { updateNav(r.data.session); });
+      _sb.auth.onAuthStateChange(function (_event, session) { updateNav(session); });
+    })();
+  </script>
 </body>
 </html>
