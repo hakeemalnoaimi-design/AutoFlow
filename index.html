@@ -600,7 +600,8 @@
         if (event === 'SIGNED_IN' && session) {
           var isNewUser = new Date(session.user.last_sign_in_at) - new Date(session.user.created_at) < 10000;
           if (isNewUser) {
-            await fetch('https://hakeem93.app.n8n.cloud/webhook/autoflow-google-signup', {
+            console.log('Sending to webhook:', session.user.email, 'isNewUser:', isNewUser);
+            var response = await fetch('https://hakeem93.app.n8n.cloud/webhook/autoflow-google-signup', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -611,6 +612,7 @@
                 'Status': 'Active'
               })
             });
+            console.log('Webhook response status:', response.status);
           }
         }
       });
