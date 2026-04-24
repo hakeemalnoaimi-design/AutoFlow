@@ -589,41 +589,28 @@
         }
       }
 
-      // ── GOOGLE SIGNUP WEBHOOK ───────────────────────────────────────────────
-      // Called from onAuthStateChange when event === 'SIGNED_IN' and provider === 'google'.
-      // Sends to n8n only for new accounts (created_at ≈ last_sign_in_at within 10 s).
-      // localStorage key prevents re-sending on subsequent logins.
-      function notifyGoogleSignup(user) {
-        var key = 'af_notified_' + user.id;
-        if (localStorage.getItem(key)) return;
-
-        var created    = new Date(user.created_at).getTime();
-        var lastSignIn = new Date(user.last_sign_in_at).getTime();
-        if (Math.abs(lastSignIn - created) > 10000) return; // returning user — timestamps are far apart
-
-        localStorage.setItem(key, '1'); // mark now to prevent double-send on rapid re-renders
-
-        var fullName = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || user.email;
-        fetch('https://hakeem93.app.n8n.cloud/webhook/autoflow-google-signup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            'Full Name': fullName,
-            'Email': user.email,
-            'Signup Date': new Date().toISOString(),
-            'Source': 'Google',
-            'Status': 'Active'
-          })
-        }).catch(function () {});
-      }
-
       _sb.auth.getSession().then(function (r) { updateNav(r.data.session); });
-      _sb.auth.onAuthStateChange(function (event, session) {
+
+      // ── GOOGLE SIGNUP WEBHOOK ─────────────────────────────────────────────
+      // Fires on every SIGNED_IN event (including after the Google OAuth redirect
+      // back to this page). New-user detection: last_sign_in_at and created_at
+      // are within 10 seconds of each other only on the very first login.
+      _sb.auth.onAuthStateChange(async function (event, session) {
         updateNav(session);
         if (event === 'SIGNED_IN' && session) {
-          var user = session.user;
-          if (user.app_metadata && user.app_metadata.provider === 'google') {
-            notifyGoogleSignup(user);
+          var isNewUser = new Date(session.user.last_sign_in_at) - new Date(session.user.created_at) < 10000;
+          if (isNewUser) {
+            await fetch('https://hakeem93.app.n8n.cloud/webhook/autoflow-google-signup', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                'Full Name': session.user.user_metadata.full_name || session.user.email,
+                'Email': session.user.email,
+                'Signup Date': new Date().toISOString(),
+                'Source': 'Google',
+                'Status': 'Active'
+              })
+            });
           }
         }
       });
