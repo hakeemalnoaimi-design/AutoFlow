@@ -136,9 +136,9 @@
   </main>
 
   <script>
-    const CLIENT_KEY    = 'sbaw8qiaqknltwyaco';
-    const CLIENT_SECRET = 'uyCUuwlQmqOSFmNh6xd2HqM8LOaAaqK8';
-    const REDIRECT_URI  = 'https://auto-flow-nu.vercel.app/tiktok-auth.html';
+    const CLIENT_KEY   = 'sbaw8qiaqknltwyaco';
+    const REDIRECT_URI = 'https://auto-flow-nu.vercel.app/tiktok-auth.html';
+    const N8N_WEBHOOK  = 'https://hakeem93.app.n8n.cloud/webhook/tiktok-auth';
 
     function show(id) { document.getElementById(id).classList.remove('hidden'); }
     function hide(id) { document.getElementById(id).classList.add('hidden'); }
@@ -196,28 +196,19 @@
       window.location.href = url.toString();
     });
 
-    // ── TOKEN EXCHANGE (client-side) ──────────────────────────────────────────
+    // ── TOKEN EXCHANGE via n8n ────────────────────────────────────────────────
     async function exchangeCode(code) {
       const verifier = sessionStorage.getItem('tiktok_verifier');
 
-      const body = new URLSearchParams({
-        client_key:    CLIENT_KEY,
-        client_secret: CLIENT_SECRET,
-        code:          code,
-        grant_type:    'authorization_code',
-        redirect_uri:  REDIRECT_URI,
-        code_verifier: verifier,
-      });
-
       try {
-        const res  = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
+        const res  = await fetch(N8N_WEBHOOK, {
           method:  'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Cache-Control': 'no-cache' },
-          body:    body.toString(),
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ code, code_verifier: verifier }),
         });
         const data = await res.json();
 
-        const token = data.data?.access_token;
+        const token = data.access_token;
         if (token) {
           hide('loading-section');
           show('success-section');
@@ -228,12 +219,12 @@
         } else {
           hide('loading-section');
           show('connect-section');
-          showError(data.error?.message || data.message || 'Failed to exchange authorization code. Please try again.');
+          showError(data.error || 'Token exchange failed. Please try again.');
         }
       } catch {
         hide('loading-section');
         show('connect-section');
-        showError('Network error — TikTok\'s token endpoint may not allow browser requests (CORS). Try again or contact support.');
+        showError('Could not reach the token exchange service. Please try again.');
       }
     }
 
