@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connect TikTok — AutoFlow</title>
+  <meta name="description" content="Connect your TikTok account to AutoFlow." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50:  '#EEF2FF',
+              100: '#E0E7FF',
+              200: '#C7D2FE',
+              500: '#6366F1',
+              600: '#4F46E5',
+              700: '#4338CA',
+            }
+          },
+          fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="font-sans text-gray-800 antialiased min-h-screen" style="background: linear-gradient(135deg, #EEF2FF 0%, #ffffff 60%, #F0FDF4 100%);">
+
+  <!-- NAVBAR -->
+  <nav class="bg-white/80 backdrop-blur border-b border-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center h-16">
+        <a href="index.html" class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+          <span class="text-xl font-bold text-gray-900">AutoFlow</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="flex items-start justify-center pt-12 pb-16 px-4">
+    <div class="w-full max-w-md">
+
+      <!-- Card -->
+      <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+
+        <!-- Header -->
+        <div class="text-center mb-7">
+          <div class="w-16 h-16 rounded-2xl bg-black flex items-center justify-center mx-auto mb-4 shadow-lg shadow-black/20">
+            <svg class="w-9 h-9" viewBox="0 0 24 24" fill="white">
+              <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.91a8.16 8.16 0 004.77 1.52V7a4.85 4.85 0 01-1-.31z"/>
+            </svg>
+          </div>
+          <h1 class="text-2xl font-extrabold text-gray-900">Connect TikTok</h1>
+          <p class="mt-1.5 text-sm text-gray-500">Link your TikTok account to enable automations.</p>
+        </div>
+
+        <!-- Error banner -->
+        <div id="error-banner" class="hidden mb-5 flex items-center gap-2.5 p-3.5 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+          <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span id="error-text">Something went wrong. Please try again.</span>
+        </div>
+
+        <!-- CONNECT STATE -->
+        <div id="connect-section">
+          <button id="connect-btn" type="button"
+            class="w-full flex items-center justify-center gap-3 px-6 py-3 bg-black hover:bg-gray-900 text-white font-semibold rounded-xl shadow-lg shadow-black/20 transition-all">
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="white">
+              <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.91a8.16 8.16 0 004.77 1.52V7a4.85 4.85 0 01-1-.31z"/>
+            </svg>
+            Connect TikTok Account
+          </button>
+          <p class="text-center text-xs text-gray-400 mt-4">
+            You'll be redirected to TikTok to authorize access.
+          </p>
+        </div>
+
+        <!-- LOADING STATE -->
+        <div id="loading-section" class="hidden text-center py-6">
+          <svg class="w-10 h-10 animate-spin text-brand-500 mx-auto mb-3" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          <p class="text-sm text-gray-500">Exchanging authorization code…</p>
+        </div>
+
+        <!-- SUCCESS STATE -->
+        <div id="success-section" class="hidden">
+          <div class="text-center mb-5">
+            <div class="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
+              <svg class="w-7 h-7 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900">TikTok Connected!</h3>
+            <p class="text-sm text-gray-500 mt-1">Copy your access token below and paste it into your automation.</p>
+          </div>
+
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">Access Token</label>
+          <textarea id="token-box" readonly rows="4"
+            class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-xs font-mono text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"></textarea>
+
+          <button id="copy-btn" type="button"
+            class="w-full mt-3 flex items-center justify-center gap-2 px-6 py-2.5 bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold rounded-xl shadow-lg shadow-brand-500/25 transition-all">
+            <svg id="copy-icon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            <span id="copy-text">Copy Token</span>
+          </button>
+
+          <div class="mt-5 pt-5 border-t border-gray-100 text-center">
+            <a href="index.html" class="text-sm text-brand-600 hover:text-brand-700 font-medium transition-colors">← Back to AutoFlow</a>
+          </div>
+        </div>
+
+      </div>
+
+      <p class="text-center text-xs text-gray-400 mt-5">
+        <a href="terms.html" class="hover:text-gray-600 transition-colors">Terms</a>
+        <span class="mx-2">·</span>
+        <a href="privacy.html" class="hover:text-gray-600 transition-colors">Privacy</a>
+      </p>
+    </div>
+  </main>
+
+  <script>
+    const CLIENT_KEY   = 'awx31e2vn25qdf0x';
+    const REDIRECT_URI = 'https://auto-flow-nu.vercel.app/tiktok-auth.html';
+
+    function show(id) { document.getElementById(id).classList.remove('hidden'); }
+    function hide(id) { document.getElementById(id).classList.add('hidden'); }
+
+    function showError(msg) {
+      document.getElementById('error-text').textContent = msg;
+      show('error-banner');
+    }
+
+    function generateCodeVerifier() {
+      const arr = new Uint8Array(32);
+      crypto.getRandomValues(arr);
+      return btoa(String.fromCharCode(...arr))
+        .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    }
+
+    async function generateCodeChallenge(verifier) {
+      const data   = new TextEncoder().encode(verifier);
+      const digest = await crypto.subtle.digest('SHA-256', data);
+      return btoa(String.fromCharCode(...new Uint8Array(digest)))
+        .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    }
+
+    // ── CHECK REDIRECT BACK FROM TIKTOK ──────────────────────────────────────
+    const params = new URLSearchParams(window.location.search);
+    const code   = params.get('code');
+    const error  = params.get('error');
+
+    if (error) {
+      showError('TikTok authorization failed: ' + (params.get('error_description') || error));
+    } else if (code) {
+      hide('connect-section');
+      show('loading-section');
+      exchangeCode(code);
+    }
+
+    // ── CONNECT BUTTON ────────────────────────────────────────────────────────
+    document.getElementById('connect-btn').addEventListener('click', async function () {
+      const verifier  = generateCodeVerifier();
+      const challenge = await generateCodeChallenge(verifier);
+      const state     = (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2));
+
+      sessionStorage.setItem('tiktok_verifier', verifier);
+      sessionStorage.setItem('tiktok_state', state);
+
+      const url = new URL('https://www.tiktok.com/v2/auth/authorize/');
+      url.searchParams.set('client_key',             CLIENT_KEY);
+      url.searchParams.set('redirect_uri',           REDIRECT_URI);
+      url.searchParams.set('response_type',          'code');
+      url.searchParams.set('scope',                  'user.info.basic,video.list,video.upload');
+      url.searchParams.set('state',                  state);
+      url.searchParams.set('code_challenge',         challenge);
+      url.searchParams.set('code_challenge_method',  'S256');
+
+      window.location.href = url.toString();
+    });
+
+    // ── TOKEN EXCHANGE ────────────────────────────────────────────────────────
+    async function exchangeCode(code) {
+      const verifier = sessionStorage.getItem('tiktok_verifier');
+
+      try {
+        const res  = await fetch('/api/tiktok-token', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ code, code_verifier: verifier }),
+        });
+        const data = await res.json();
+
+        if (data.access_token) {
+          hide('loading-section');
+          show('success-section');
+          document.getElementById('token-box').value = data.access_token;
+          sessionStorage.removeItem('tiktok_verifier');
+          sessionStorage.removeItem('tiktok_state');
+          window.history.replaceState({}, '', window.location.pathname);
+        } else {
+          hide('loading-section');
+          show('connect-section');
+          showError(data.error || 'Failed to exchange authorization code. Please try again.');
+        }
+      } catch {
+        hide('loading-section');
+        show('connect-section');
+        showError('Network error. Please try again.');
+      }
+    }
+
+    // ── COPY BUTTON ───────────────────────────────────────────────────────────
+    document.getElementById('copy-btn').addEventListener('click', function () {
+      const box  = document.getElementById('token-box');
+      const text = document.getElementById('copy-text');
+      navigator.clipboard.writeText(box.value).then(function () {
+        text.textContent = 'Copied!';
+        setTimeout(function () { text.textContent = 'Copy Token'; }, 2000);
+      }).catch(function () {
+        box.select();
+        document.execCommand('copy');
+        text.textContent = 'Copied!';
+        setTimeout(function () { text.textContent = 'Copy Token'; }, 2000);
+      });
+    });
+  </script>
+</body>
+</html>
